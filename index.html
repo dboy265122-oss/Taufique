@@ -199,7 +199,7 @@ footer{padding:44px 0;border-top:1px solid var(--border);text-align:center;posit
 .fcp span{color:var(--cyan)}
 
 /* REVEAL */
-.rv{opacity:0;transform:translateY(26px);transition:opacity .6s ease,transform .6s ease}
+.rv{opacity:0;transform:translateY(20px);transition:opacity .5s ease,transform .5s ease} @media(max-width:900px){.rv,.rv.d1,.rv.d2,.rv.d3{opacity:1 !important;transform:none !important}}
 .rv.on{opacity:1;transform:none}
 .d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
 
@@ -572,7 +572,7 @@ window.addEventListener('load', function() {
     entries.forEach(function(e) {
       if (e.isIntersecting) { e.target.classList.add('on'); obs.unobserve(e.target); }
     });
-  }, { threshold: 0.1 });
+  }, { threshold: 0.01 });
   rvEls.forEach(function(el) { obs.observe(el); });
 
   /* CALCULATOR */
