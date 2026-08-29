@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dev Calculator — SK Taufique Hossain</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#03040a;--surface:#080d1a;--card:#0c1220;--border:rgba(255,255,255,.07);--cyan:#22d3ee;--violet:#a78bfa;--white:#e8f0ff;--muted:#4b5a7a;--ff:'Space Grotesk',system-ui;--mono:'Space Mono',monospace}
+body{background:var(--bg);color:var(--white);font-family:var(--ff);min-height:100vh;-webkit-font-smoothing:antialiased}
+nav{padding:16px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(3,4,10,.9);backdrop-filter:blur(20px);z-index:10}
+.logo{font-family:var(--mono);color:var(--cyan);font-size:.82rem;letter-spacing:.08em;text-decoration:none}
+.back{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border:1px solid var(--border);border-radius:6px;font-size:.8rem;color:var(--muted);text-decoration:none;transition:all .2s}
+.back:hover{border-color:var(--cyan);color:var(--cyan)}
+main{max-width:440px;margin:0 auto;padding:60px 24px}
+.hero{text-align:center;margin-bottom:48px}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border:1px solid rgba(34,211,238,.25);border-radius:100px;font-family:var(--mono);font-size:.62rem;letter-spacing:.15em;color:var(--cyan);margin-bottom:20px}
+h1{font-size:clamp(2rem,6vw,3rem);font-weight:700;letter-spacing:-.03em;margin-bottom:12px}
+.gr{background:linear-gradient(135deg,var(--cyan),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sub{color:var(--muted);font-size:.9rem;line-height:1.7}
+/* Calculator */
+.calc{background:var(--card);border:1px solid rgba(34,211,238,.2);border-radius:20px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.6)}
+.calc-screen{padding:20px 24px 16px;text-align:right;background:var(--surface);border-bottom:1px solid var(--border);min-height:90px;display:flex;flex-direction:column;justify-content:flex-end}
+#ce{font-family:var(--mono);font-size:.8rem;color:var(--muted);min-height:18px;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#cv{font-family:var(--mono);font-size:2.4rem;font-weight:700;color:var(--white);line-height:1;word-break:break-all}
+.calc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)}
+.cb{background:var(--card);color:var(--white);border:none;padding:20px 8px;font-family:var(--mono);font-size:1.1rem;cursor:pointer;transition:background .15s,transform .1s;-webkit-tap-highlight-color:transparent;position:relative}
+.cb:hover{background:var(--surface)}
+.cb:active{background:rgba(34,211,238,.12);transform:scale(.95)}
+.cb.op{color:var(--cyan);font-weight:700;font-size:1.2rem}
+.cb.op:hover{background:rgba(34,211,238,.06)}
+.cb.eq{background:linear-gradient(135deg,var(--cyan),var(--violet));color:var(--bg);font-weight:700}
+.cb.eq:hover{opacity:.9}
+.cb.eq:active{opacity:.8;transform:scale(.96)}
+.cb.fn{color:var(--violet);font-size:.9rem}
+.cb.w2{grid-column:span 2;text-align:left;padding-left:28px}
+/* History */
+.hist{margin-top:32px;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.hist-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.hist-title{font-family:var(--mono);font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--violet)}
+.hist-clear{font-size:.72rem;font-family:var(--mono);color:var(--muted);background:none;border:none;cursor:pointer;transition:color .2s}
+.hist-clear:hover{color:var(--white)}
+.hist-list{max-height:200px;overflow-y:auto}
+.hist-item{display:flex;justify-content:space-between;align-items:center;padding:10px 18px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:.8rem;cursor:pointer;transition:background .2s}
+.hist-item:last-child{border-bottom:none}
+.hist-item:hover{background:var(--surface)}
+.hist-expr{color:var(--muted);font-size:.72rem}
+.hist-res{color:var(--cyan);font-weight:700}
+/* Keyboard hint */
+.hint{text-align:center;margin-top:20px;font-family:var(--mono);font-size:.65rem;color:var(--muted)}
+footer{text-align:center;padding:40px 24px;border-top:1px solid var(--border);margin-top:64px;font-size:.78rem;color:var(--muted)}
+footer span{color:var(--cyan)}
+</style>
+</head>
+<body>
+<nav>
+  <a href="../index.html" class="logo">SK_TAUFIQUE.DEV</a>
+  <a href="../index.html" class="back">← Back to Portfolio</a>
+</nav>
+<main>
+  <div class="hero">
+    <div class="badge">🧮 PROJECT · LIVE DEMO</div>
+    <h1>Dev <span class="gr">Calculator</span></h1>
+    <p class="sub">A clean, fully functional calculator with history. Supports keyboard input — try it!</p>
+  </div>
+
+  <div class="calc">
+    <div class="calc-screen">
+      <div id="ce"></div>
+      <div id="cv">0</div>
+    </div>
+    <div class="calc-grid">
+      <button class="cb fn" data-a="AC">AC</button>
+      <button class="cb fn" data-a="+/-">+/-</button>
+      <button class="cb fn" data-a="%">%</button>
+      <button class="cb op" data-a="÷">÷</button>
+      <button class="cb" data-a="7">7</button>
+      <button class="cb" data-a="8">8</button>
+      <button class="cb" data-a="9">9</button>
+      <button class="cb op" data-a="×">×</button>
+      <button class="cb" data-a="4">4</button>
+      <button class="cb" data-a="5">5</button>
+      <button class="cb" data-a="6">6</button>
+      <button class="cb op" data-a="−">−</button>
+      <button class="cb" data-a="1">1</button>
+      <button class="cb" data-a="2">2</button>
+      <button class="cb" data-a="3">3</button>
+      <button class="cb op" data-a="+">+</button>
+      <button class="cb w2" data-a="0">0</button>
+      <button class="cb" data-a=".">.</button>
+      <button class="cb eq" data-a="=">=</button>
+    </div>
+  </div>
+
+  <div class="hist" id="hist" style="display:none">
+    <div class="hist-head">
+      <div class="hist-title">/ History</div>
+      <button class="hist-clear" onclick="clearHist()">Clear</button>
+    </div>
+    <div class="hist-list" id="hist-list"></div>
+  </div>
+
+  <div class="hint">Keyboard: 0-9, + - * / Enter Backspace Escape</div>
+</main>
+<footer>Built by <span>SK Taufique Hossain</span> · <a href="../index.html" style="color:var(--violet);text-decoration:none">View Portfolio</a></footer>
+
+<script>
+var cur='0', expr='', op=null, prev=null, fresh=false, history=[];
+var cv=document.getElementById('cv'), ce=document.getElementById('ce');
+
+function upd(){ cv.textContent=cur; ce.textContent=expr; }
+
+function calc(a){
+  if(a==='AC'){ cur='0'; expr=''; op=null; prev=null; fresh=false; }
+  else if(a==='+/-'){ cur=cur.startsWith('-')?cur.slice(1):cur==='0'?'0':'-'+cur; }
+  else if(a==='%'){ cur=String(parseFloat(cur)/100); }
+  else if(['÷','×','−','+'].indexOf(a)>-1){
+    if(op&&prev!==null&&!fresh){ doEquals(); }
+    prev=parseFloat(cur); op=a; expr=cur+' '+a; fresh=true;
+  }
+  else if(a==='='){
+    if(op&&prev!==null){
+      var n=parseFloat(cur), r;
+      if(op==='÷') r=n===0?'Error':prev/n;
+      else if(op==='×') r=prev*n;
+      else if(op==='−') r=prev-n;
+      else r=prev+n;
+      var fullExpr=expr+' '+cur+' =';
+      var result=r==='Error'?'Error':String(parseFloat(r.toFixed(10)));
+      addHist(fullExpr, result);
+      expr=fullExpr;
+      cur=result;
+      op=null; prev=null; fresh=false;
+    }
+  }
+  else if(a==='.'){
+    if(fresh){cur='0.';fresh=false;}
+    else if(cur.indexOf('.')===-1) cur+='.';
+  }
+  else{
+    if(cur==='0'||fresh){cur=a;fresh=false;}
+    else if(cur.length<15) cur+=a;
+  }
+  upd();
+}
+
+function doEquals(){ calc('='); }
+
+function addHist(expr, res){
+  if(res==='Error') return;
+  history.unshift({expr:expr,res:res});
+  if(history.length>10) history.pop();
+  renderHist();
+}
+
+function renderHist(){
+  var h=document.getElementById('hist');
+  var list=document.getElementById('hist-list');
+  if(!history.length){h.style.display='none';return;}
+  h.style.display='block';
+  list.innerHTML='';
+  history.forEach(function(item){
+    var div=document.createElement('div');
+    div.className='hist-item';
+    div.innerHTML='<span class="hist-expr">'+item.expr+'</span><span class="hist-res">'+item.res+'</span>';
+    div.onclick=function(){ cur=item.res; expr=''; op=null; prev=null; fresh=false; upd(); };
+    list.appendChild(div);
+  });
+}
+
+function clearHist(){ history=[]; renderHist(); }
+
+document.querySelectorAll('.cb').forEach(function(b){
+  b.addEventListener('click',function(){ calc(b.dataset.a); });
+});
+
+document.addEventListener('keydown',function(e){
+  var map={'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9','+':'+','-':'−','*':'×','/':'÷','Enter':'=','=':'=','.':'.','Escape':'AC','Backspace':'DEL','%':'%'};
+  var a=map[e.key];
+  if(a==='DEL'){ if(cur.length>1&&cur!=='0') cur=cur.slice(0,-1); else cur='0'; upd(); return; }
+  if(a) calc(a);
+});
+</script>
+</body>
+</html>
